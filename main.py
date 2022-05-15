@@ -1,5 +1,8 @@
 import typer
 import xlrd
+import decimal
+from quiffen import Qif, Category
+import quiffen
 
 app = typer.Typer()
 
@@ -37,7 +40,7 @@ def icici_row2dict(row: list):
 	}
 
 @app.command()
-def hello(input_fname: str = "data.xls", output_fname: str = "data.csv", header_idx: int = 12):
+def icici(input_fname: str = "data.xls", output_fname: str = "data.csv", header_idx: int = 12):
 	trxs = []
 
 	book = xlrd.open_workbook(input_fname)
@@ -56,13 +59,49 @@ def hello(input_fname: str = "data.xls", output_fname: str = "data.csv", header_
 				f.write(f"{transaction[key]},")
 			f.write("\n")
 
-
 @app.command()
-def goodbye(name: str, formal: bool = False):
-	if formal:
-		typer.echo(f"Goodbye Ms. {name}")
-	else:
-		typer.echo(f"Bye {name}")
+def qif_stuff(input_fname: str = "stmt.qif", output_fname: str = "data.qif", day_first: bool = False):
+	qif = Qif.parse(input_fname, day_first=day_first)
+	acc = qif.accounts['Quiffen Default Account']
+	trs = acc.transactions['Bank']
+
+	new_qif = Qif()
+	new_acc = quiffen.Account('Personal Bank Account', "My personal bank account")
+	new_qif.add_account(new_acc)
+
+	transfer = Category('Transfer')
+	shopping = Category('Shopping')
+	subscriptions = Category('Subscriptions')
+
+	qif.add_category(transfer)
+	new_qif.add_category(transfer)
+
+	qif.add_category(shopping)
+	new_qif.add_category(shopping)
+
+	qif.add_category(subscriptions)
+	new_qif.add_category(subscriptions)
+
+
+	for tr in trs:
+		tr.memo = tr.payee
+		if "Zelle" in tr.payee:
+			tr.payee = tr.payee.split(";")[-1].strip().title()
+			tr.category = transfer
+		elif "Amzn" in tr.payee.title():
+			tr.payee = "Amazon"
+			tr.category = shopping
+		elif "Chegg" in tr.payee:
+			tr.payee = "Chegg"
+			tr.category = subscriptions
+		elif "Purchase" in tr.payee.title():
+			details = tr.payee.title().split(" ")
+			idx_for_purchase = details.index("Purchase")
+			tr.payee = " ".join(details[:idx_for_purchase-1])
+		new_acc.add_transaction(tr,header="Bank")
+
+	#new_qif.to_qif(output_fname)
+	new_qif.to_csv(f"{output_fname}.csv")
 
 if __name__ == "__main__":
 	app()
