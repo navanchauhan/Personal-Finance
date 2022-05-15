@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "personal-finance"
+version = "0.1.0"
+description = ""
+authors = ["navanchauhan <navanchauhan@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pandas = "^1.4.2"
+xlrd = "^2.0.1"
+typer = "^0.4.1"
+quiffen = "^1.2.2"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
