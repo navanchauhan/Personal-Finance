@@ -72,6 +72,10 @@ def qif_stuff(input_fname: str = "stmt.qif", output_fname: str = "data.qif", day
 	transfer = Category('Transfer')
 	shopping = Category('Shopping')
 	subscriptions = Category('Subscriptions')
+	food = Category('Food')
+
+	qif.add_category(food)
+	new_qif.add_category(food)
 
 	qif.add_category(transfer)
 	new_qif.add_category(transfer)
@@ -91,9 +95,20 @@ def qif_stuff(input_fname: str = "stmt.qif", output_fname: str = "data.qif", day
 		elif "Amzn" in tr.payee.title():
 			tr.payee = "Amazon"
 			tr.category = shopping
-		elif "Chegg" in tr.payee:
+		elif "hulu" in tr.payee.lower():
+			tr.payee = "Hulu"
+			tr.category = subscriptions
+		elif "waffle lab" in tr.payee.lower():
+			tr.payee = "The Waffle Lab"
+			tr.category = food
+		elif "mcdonald" in tr.payee.lower():
+			tr.category = food
+		elif "chegg" in tr.payee.lower():
 			tr.payee = "Chegg"
 			tr.category = subscriptions
+		elif "Cosmos Pizza" in tr.payee.title():
+			tr.category = food
+			tr.payee = "Cosmos Pizza - Boulder"
 		elif "Purchase" in tr.payee.title():
 			details = tr.payee.title().split(" ")
 			idx_for_purchase = details.index("Purchase")
